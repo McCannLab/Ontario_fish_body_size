@@ -1,0 +1,33 @@
+Package: ffbs2w
+Type: Package
+Title: Freshwater Fish Body Sizes Response to Warming
+Version: 0.0.0.9000
+Date: 2023-08-10
+Authors@R: c(
+  person("Connor", "Warne", role = c("aut", "cre"), email = "connor.warne@gmail.com"),
+  person("Kevin", "Cazelles", role = c("aut"), email = "kevin.cazelles@gmail.com", comment = c(ORCID = "0000-0001-6619-9874")))
+Description: Code to reproduce analyses in 'Thermal tolerance and habitat preferences mediate how freshwater fish body sizes respond to warming'
+Depends: R (>= 4.2)
+Additional_repositories: 
+    https://inla.r-inla-download.org/R/stable/
+Imports: 
+    cli,
+    dplyr,
+    car,
+    geodata,
+    ggplot2,
+    INLA,
+    nlsr,
+    patchwork,
+    purrr,
+    regclass,
+    sf,
+    stringr,
+    tibble,
+    tidyr
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Config/testthat/edition: 3
