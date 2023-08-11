@@ -1,13 +1,16 @@
 #' Fit Von Bertalanffy model for all lakes
 #'
 #' @param bsm_master main dataset.
-#' @param nMinIndiv a vector of integers providing the minimal number 
-#' individuals required for a lake to be included in te analysis.
-#' 
+#' @param nMinIndiv a vector of integers providing the minimal number
+#' individuals required for a lake to be included in the analysis.
+#'
 #' Three parameters are estimated:
-#' * Linf
-#' * k
-#' * t0
+#' * Linf: asymptotic size,
+#' * k: growth coefficient,
+#' * t0: age when size is 0.
+#'
+#' @references
+#' <https://en.wikipedia.org/wiki/Von_Bertalanffy_function>
 #'
 #' @export
 fitVBGF <- function(
@@ -42,7 +45,7 @@ fitVBGF <- function(
         dplyr::filter(count > j)
       spc <- names(ls_spc_val)[i]
       cli::cli_progress_step(
-        paste("Running models for", spc, "with min indiv =", j)
+        paste("Running Von Bertalanffy models for", spc, "with min indiv =", j)
       )
       ls_out[[i]] <- getLinfKappa(
         spc,
@@ -52,14 +55,14 @@ fitVBGF <- function(
       cli::cli_progress_done()
     }
     # once the nlxb function (VBGF) has been run for all 5 species,
-    # combine those dataframes and output as an RDS - this was done for
+    # combine those data frames and output as an RDS - this was done for
     # multiple specimens/lakes for a supplemental analysis (15 specimens
     # per lake is the threshold we present in our study)
-    dir.create("output", showWarnings = FALSE)
+    if (!dir.exists("output")) dir.create("output")
     fl <- file.path("output", paste0("sp_all_nlxb_", j, ".rds"))
     cli::cli_progress_step("Generating {fl}")
     out <- do.call(rbind, ls_out) |>
-      # add Wby_LID_Year and environnmental variables
+      # add Wby_LID_Year and environmental variables
       dplyr::left_join(
         bsm_master |>
           dplyr::select(
@@ -102,10 +105,9 @@ getLinfKappa <- function(spc, ls_val, dat) {
     do.call(what = rbind) |>
     as.data.frame() |>
     dplyr::rename("Linf_nlxb" = "Linf", "Kappa_nlxb" = "k", "t0_nlxb" = "t0")
-  # ----------- HERE metric of quality of fit? ------------------
   out <- cbind(nlxbCoef, lake_serial = vecLake, SpeciesCode = ls_val$code) |>
     dplyr::filter(Linf_nlxb < ls_val$unreal)
-  # this includes the resultats that should be merged in a second step.
-  
+  # this includes the results that should be merged in a second step.
+
   return(out)
 }

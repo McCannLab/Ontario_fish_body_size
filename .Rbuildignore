@@ -1,0 +1,6 @@
+^data/maps$
+^data/*.csv$
+^CJFAS$
+^fig$
+^output$
+^\.vscode$

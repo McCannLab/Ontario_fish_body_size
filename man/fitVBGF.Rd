@@ -10,15 +10,18 @@ fitVBGF(bsm_master = readRDS("data/BSM_MASTER.rds"), nMinIndiv = 15)
 \item{bsm_master}{main dataset.}
 
 \item{nMinIndiv}{a vector of integers providing the minimal number
-individuals required for a lake to be included in te analysis.
+individuals required for a lake to be included in the analysis.
 
 Three parameters are estimated:
 \itemize{
-\item Linf
-\item k
-\item t0
+\item Linf: asymptotic size,
+\item k: growth coefficient,
+\item t0: age when size is 0.
 }}
 }
 \description{
 Fit Von Bertalanffy model for all lakes
+}
+\references{
+\url{https://en.wikipedia.org/wiki/Von_Bertalanffy_function}
 }

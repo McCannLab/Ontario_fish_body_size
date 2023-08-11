@@ -16,7 +16,9 @@ Efxplot(
   VarOrder = NULL,
   Intercept = TRUE,
   Size = 1,
-  tips = 0.2
+  tips = 0.2,
+  lwd = 0.1,
+  pdw = 0.6
 )
 }
 \description{

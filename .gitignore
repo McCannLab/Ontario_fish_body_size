@@ -3,8 +3,8 @@
 .vscode
 inst
 data/*
-!data/BSM_MASTER_mock.rds
-!data/bsm_lake_clim_mock.rds
+!data/BSM_MASTER_MOCK.rda
+!data/BSM_LAKE_CLIM_MOCK.rda
 output/
 CJFAS
 
@@ -49,4 +49,3 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
-

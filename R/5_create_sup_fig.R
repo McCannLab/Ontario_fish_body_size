@@ -4,9 +4,8 @@
 #'
 #' @export
 figSup <- function(bsm_master = readRDS("data/BSM_MASTER.rds")) {
-
   # for supplementary
-  spe_perc  <- bsm_master |>
+  spe_perc <- bsm_master |>
     dplyr::group_by(Species) |>
     dplyr::summarise(Percent = mean(Age <= 15, na.rm = TRUE))
 
@@ -19,15 +18,16 @@ figSup <- function(bsm_master = readRDS("data/BSM_MASTER.rds")) {
   p <- dat |> ggplot(aes(x = Age)) +
     geom_histogram(aes(y = after_stat(density)),
       colour = "black",
-      fill = "white"
+      fill = "transparent",
+      linewidth = 0.4
     ) +
     xlim(0, 25) +
     geom_density(alpha = .2, fill = "#FF6666")
   #
-  p + theme_classic(base_size = 50)
+  p + theme_classic(base_size = 12)
   ggsave("fig/SMB_AgePlot_CJFAS.png",
-    width = 40, height = 20, units = "in",
-    dpi = 400
+    width = 7, height = 5, units = "in",
+    dpi = 500
   )
 
   invisible(spe_perc)

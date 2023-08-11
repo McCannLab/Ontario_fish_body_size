@@ -1,11 +1,15 @@
 #' fit INLA models
 #'
 #' @param nMinIndiv minimal number of individuals.
+#' @param bsm_lake_clim BSM lake-climate dataset (see `?BSM_LAKE_CLIM_MOCK` for
+#' further details).
+#' @param ... Further argument passed to `[INLA::inla()]`.
 #'
 #' @export
-fitInla <- function(nMinIndiv = 15, useMock = FALSE) {
+fitInla <- function(nMinIndiv = 15,
+                    bsm_lake_clim = readRDS("data/bsm_lake_clim.rds"), ...) {
   spc <- c(316, 331, 334, 91, 81)
-  allData <- prepareData(nMinIndiv = nMinIndiv, useMock = useMock)
+  allData <- prepareData(nMinIndiv = nMinIndiv, bsm_lake_clim = bsm_lake_clim)
   # species
   spcTbl <- allData |>
     dplyr::select(SpeciesCode, Species) |>
@@ -18,29 +22,27 @@ fitInla <- function(nMinIndiv = 15, useMock = FALSE) {
     )
     TestHosts <- allData |>
       dplyr::filter(SpeciesCode == spc[i])
-    lsMod[[i]] <- fitData(TestHosts)
+    lsMod[[i]] <- fitData(TestHosts, ...)
   }
   names(lsMod) <- spc
   cli::cli_progress_done()
   return(lsMod)
 }
 
-prepareData <- function(nMinIndiv = 15, useMock = FALSE) {
-  if (useMock) {
-    bsm_lake_clim <- readRDS("data/bsm_lake_clim_mock.rds")
-  } else {
-    bsm_lake_clim <- readRDS("data/bsm_lake_clim.rds")
-  }
+prepareData <- function(nMinIndiv = 15, bsm_lake_clim) {
+  bsm_lake_clim <- bsm_lake_clim |>
+    dplyr::distinct()
   # step 2 required
   fl <- paste0("output/sp_all_nlxb_", nMinIndiv, ".rds")
   if (!file.exists(fl)) {
     stop("Data from step 2 are required, see ?fitVBGF")
   }
-  df <- readRDS(paste0("output/sp_all_nlxb_", nMinIndiv, ".rds")) |>
-    dplyr::left_join(bsm_lake_clim, by = "Wby_LID_Year") |>
+  df <- readRDS(fl) |>
+    dplyr::inner_join(bsm_lake_clim, by = "Wby_LID_Year") |>
+    # filtering out NAs
     na.omit()
   names(df) <- transfoNames(names(df))
-  # filtering out nas, unrealistic values for GDD and lake area:
+  # filtering unrealistic values for GDD and lake area:
   df <- df |>
     dplyr::filter(GDD5.mean.GS15 > 0) |>
     dplyr::filter(Area.ha <= 10000) |>
@@ -75,7 +77,7 @@ transfoNames <- function(x) {
     unlist()
 }
 
-fitData <- function(TestHosts) {
+fitData <- function(TestHosts, ...) {
   phen <- c("FMZ", "Longitude", "Latitude", "Cycle", "Year", "Waterbody_LID_Year") # Base columns with spatial information we'll need
   resp <- "Linf.nlxb" # Response variable
   Finalcovar <- c(
@@ -165,7 +167,7 @@ fitData <- function(TestHosts) {
     )
   ) # attach the w
 
-  # need to record the current environnement for formula
+  # need to record the current environment for formula
   curenv <- environment()
   f1 <- paste0("y ~ -1 + Intercept + ", paste0(colnames(X), collapse = " + "))
   ls_formula <- list(
@@ -176,15 +178,16 @@ fitData <- function(TestHosts) {
   ) |>
     lapply(as.formula, env = curenv)
 
-  INLA::inla.setOption(num.threads = 8)
-  # ls_mod  <- ""
   ls_mod <- lapply(
     ls_formula,
     \(x) INLA::inla(x, # Base model (no random effects)
       family = "gaussian",
       data = INLA::inla.stack.data(StackHost),
       control.compute = list(dic = TRUE),
-      control.predictor = list(A = INLA::inla.stack.A(StackHost))
+      control.predictor = list(A = INLA::inla.stack.A(StackHost)),
+      control.inla = list(cmin = 0, strategy = "Laplace"),
+      num.threads = "1:1",
+      ...
     )
   )
 
@@ -194,8 +197,8 @@ fitData <- function(TestHosts) {
 #' @describeIn fitInla Generates ExfPlot plots.
 #' @param lsMod List of INLA model.
 #' @export
-allExfPlot <- function(lsMod) {
-  # creating species-sepcific exfplots - these will show the various
+allExfPlot <- function(lsMod, nMinIndiv = 15) {
+  # creating species-specific exfplots - these will show the various
   # (1-4) model output for the one species that you have just run the INLA for:
   resFigDic <- resDic <- resFigExf <- list()
   for (i in seq(lsMod)) {
@@ -231,13 +234,21 @@ allExfPlot <- function(lsMod) {
   # making the efxplot using the best model (lowest DIC) for each species:
   y <- Efxplot(lsFinalMod,
     StarLoc = NULL,
-    Intercept = FALSE, Size = 10, tips = 0.5,
+    Intercept = FALSE, Size = 1.6, tips = 0.5, lwd = 0.5,
     ModelNames = c("Smallmouth Bass", "Yellow Perch", "Walleye", "Lake Whitefish", "Lake Trout")
   )
-  # y + theme_classic(base_size = 20)
 
-  y + theme_classic(base_size = 50)
-  ggsave("fig/Linf_inla_output_15spl_15yrs_mesh2.5_5_all5species_CJFAS.png", width = 40, height = 20, units = "in", dpi = 500)
+  y + theme_classic(base_size = 12)
+  flo <- paste0(
+    "Linf_inla_output_",
+    nMinIndiv,
+    "spl_15yrs_mesh2.5_5_all5species_CJFAS.png"
+  )
+  if (!dir.exists("fig")) dir.create("fig")
+  ggsave(file.path("fig", flo),
+    width = 8, height = 5, units = "in",
+    dpi = 500
+  )
 
   list(models = lsFinalMod, dic = resDic)
 }

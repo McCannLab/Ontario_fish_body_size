@@ -5,12 +5,17 @@
 \alias{allExfPlot}
 \title{fit INLA models}
 \usage{
-fitInla(nMinIndiv = 15, useMock = FALSE)
+fitInla(nMinIndiv = 15, bsm_lake_clim = readRDS("data/bsm_lake_clim.rds"), ...)
 
-allExfPlot(lsMod)
+allExfPlot(lsMod, nMinIndiv = 15)
 }
 \arguments{
 \item{nMinIndiv}{minimal number of individuals.}
+
+\item{bsm_lake_clim}{BSM lake-climate dataset (see \code{?BSM_LAKE_CLIM_MOCK} for
+further details).}
+
+\item{...}{Further argument passed to \verb{[INLA::inla()]}.}
 
 \item{lsMod}{List of INLA model.}
 }
