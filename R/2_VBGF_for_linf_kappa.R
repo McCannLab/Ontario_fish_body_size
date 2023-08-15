@@ -67,7 +67,7 @@ fitVBGF <- function(
         bsm_master |>
           dplyr::select(
             "lake_serial", "Wby_LID_Year", "Longitude", "Latitude", "Cycle",
-            "FMZ", "Mean.Depth", "Max.Depth", "Secchi.Depth", "pH", "SDF", "Conductivity", "Total.Phosphorus", "Area_ha", "pLittoral", "WC_TDS", "WC_TP"
+            "FMZ", "Mean.Depth", "Max.Depth", "Secchi.Depth", "pH", "SDF", "Conductivity", "Total.Phosphorus", "Area_ha", "pLittoral", "WC_TDS"
           ) |>
           dplyr::distinct(),
         by = dplyr::join_by("lake_serial")

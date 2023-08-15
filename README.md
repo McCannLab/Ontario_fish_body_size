@@ -51,8 +51,7 @@ formatData()
 ## Results are exported in output (created if needed)
 fitVBGF(bsm_master = BSM_MASTER_MOCK)
 # 3. INLA models (requires step 2)
-## Analysis 
-INLA::inla.setOption(num.threads = "1:1") # adjust as desired
+## Analysis (takes way more time with the mock data sets than the real one)
 res <- fitInla(nMinIndiv = 15, bsm_lake_clim = BSM_LAKE_CLIM_MOCK)
 ## Main figure (file written in `.fig/`)
 allExfPlot(res)
