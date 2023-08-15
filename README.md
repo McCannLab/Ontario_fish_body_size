@@ -1,5 +1,8 @@
 # Ontario_fish_body_size
 
+[![DOI](https://zenodo.org/badge/677167644.svg)](https://zenodo.org/badge/latestdoi/677167644)
+
+
 > Thermal tolerance and habitat preferences mediate how freshwater fish body sizes respond to warming
 
 Species included:
