@@ -22,7 +22,7 @@ fitInla <- function(nMinIndiv = 15,
     )
     TestHosts <- allData |>
       dplyr::filter(SpeciesCode == spc[i])
-    lsMod[[i]] <- fitData(TestHosts, ...)
+    lsMod[[i]] <- fitData(TestHosts, species_code = spc[i], ...)
   }
   names(lsMod) <- spc
   cli::cli_progress_done()
@@ -77,7 +77,7 @@ transfoNames <- function(x) {
     unlist()
 }
 
-fitData <- function(TestHosts, ...) {
+fitData <- function(TestHosts, species_code = 81, ...) {
   phen <- c("FMZ", "Longitude", "Latitude", "Cycle", "Year", "Waterbody_LID_Year") # Base columns with spatial information we'll need
   resp <- "Linf.nlxb" # Response variable
   Finalcovar <- c(
@@ -114,6 +114,12 @@ fitData <- function(TestHosts, ...) {
     "Precip.mean.GS15",
     "Angling.Pressure"
   )
+  if (species_code == 81) {
+      Finalcovar <- c("Angling.Pressure", "Area", "GDD5.mean.GS15", "Precip.mean.GS15")
+  } else if (species_code == 91) {
+    Finalcovar <- c("Angling.Pressure", "Area", "GDD5.mean.GS15", "Max.Depth")
+  }
+  cli::cli_alert_info("Final variable set: {Finalcovar}")
   lm_vifcheck2 <- lm(paste0(resp, " ~ ", paste(Finalcovar, collapse = " + ")), data = TestHosts)
   car::vif(lm_vifcheck2)
 
